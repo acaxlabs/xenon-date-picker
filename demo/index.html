@@ -1,0 +1,35 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <script src="../../webcomponentsjs/webcomponents.min.js"></script>
+    <link rel="import" href="../xenon-date-picker.html" />
+    <link rel="import" href="../../iron-form/iron-form.html" />
+    <link rel="import" href="../../paper-button/paper-button.html" />
+</head>
+<body>
+    <dom-module id="demo-index">
+        <template>
+            <p>regular</p>
+            <xenon-date-picker></xenon-date-picker>
+            <p>auto pop</p>
+            <xenon-date-picker auto-pop></xenon-date-picker>
+            <p>in a form</p>
+            <form is="iron-form" id="form">
+                <xenon-date-picker id="date" required></xenon-date-picker>
+                <paper-button on-click="validate">validate</paper-button>
+            </form>
+        </template>
+        <script>
+            Polymer({
+                is: "demo-index",
+                validate: function () {
+                    this.$.form.validate();
+                }
+            });
+        </script>
+    </dom-module>
+    <demo-index></demo-index>
+</body>
+</html>

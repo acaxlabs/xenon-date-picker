@@ -1,0 +1,104 @@
+﻿<link rel="import" href="../polymer/polymer.html" />
+<link rel="import" href="../xenon-date/xenon-date.html" />
+<link rel="import" href="../paper-dialog/paper-dialog.html" />
+<link rel="import" href="../paper-date-picker/paper-date-picker.html" />
+<link rel="import" href="../paper-icon-button/paper-icon-button.html" />
+<link rel="import" href="../paper-button/paper-button.html" />
+<link rel="import" href="../paper-styles/color.html" />
+<link rel="import" href="../paper-input/paper-input-container.html" />
+<link rel="import" href="../paper-input/paper-input-error.html" />
+<link rel="import" href="../iron-icons/iron-icons.html" />
+<link rel="import" href="../iron-form-element-behavior/iron-form-element-behavior.html" />
+<link rel="import" href="../neon-animation/animations/scale-up-animation.html" />
+<link rel="import" href="../neon-animation/animations/scale-down-animation.html" />
+<dom-module id="xenon-date-picker">
+    <template>
+        <style include="app-theme">
+            :host { display: block; }
+            xenon-date { color: #212121; font-size: 16px; font-weight: 400; line-height: 24px; }
+            paper-icon-button.iconbtn { color: grey }
+                paper-icon-button.iconbtn:hover { transition: background-color 0.5s linear; background-color: gainsboro; border-radius: 50%; color: #212121; }
+            .input { display: flex; align-items: center; cursor: pointer; }
+                .input:hover > paper-icon-button.iconbtn { transition: background-color 0.5s linear; background-color: gainsboro; border-radius: 50%; color: #212121; }
+        </style>
+        <paper-input-container id="container" invalid="{{invalid}}">
+            <label hidden$="[[!label]]">[[label]]</label>
+            <div class="input" on-click="_openPicker" on-mouseover="_onhover" on-mouseout="_offhover">
+                <paper-icon-button id="btn" toggles active="{{focused}}" class="iconbtn" icon="[[icon]]"></paper-icon-button>
+                <xenon-date id="input" value="[[date]]"></xenon-date>
+            </div>
+            <template is="dom-if" if="[[errorMessage]]">
+                <paper-input-error id="error">[[errorMessage]]</paper-input-error>
+            </template>
+        </paper-input-container>
+
+        <paper-dialog id="dialog" class="paper-date-picker-dialog" with-backdrop
+                      auto-fit-on-attach
+                      entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+            <paper-date-picker min-date="[[minDate]]" max-date="[[maxDate]]" id="picker" date="{{date}}"></paper-date-picker>
+            <div class="buttons">
+                <paper-button style="color:#757575;" dialog-dismiss>Cancel</paper-button>
+                <paper-button class="primary" dialog-confirm>OK</paper-button>
+            </div>
+        </paper-dialog>
+    </template>
+    <script>
+        Polymer({
+            is: "xenon-date-picker",
+            properties: {
+                name: { type: String, notify: true },
+                maxDate: { type: String, notify: true },
+                maxDate: { type: String, notify: true },
+                date: { type: String, notify: true, observer: "_onDateChanged" },
+                autoPop: { type: Boolean, notify: true, value: false, reflectToAttribute: true  },
+                disabled: { type: Boolean, notify: true, value: false },
+                invalid: { type: Boolean, notify: true, value: false },
+                errorMessage: { type: String, notify: true, value: "Please select a date" },
+                focused: { type: Boolean, notify: true, value: false, observer: "_onFocused" },
+                required: { type: Boolean, notify: true, value: false, reflectToAttribute: true },
+                icon: { type: String, value: "event" }
+            },
+            ready: function () {
+                this.$.container._inputSelector = this.$.container._inputSelector + ",xenon-date";
+                this.$.dialog.positionTarget = this.$.btn;
+            },
+            listeners: {
+                "paper-calendar-invalid-date-range":"_onInvalidRange"
+            },
+            behaviors: [
+                Polymer.IronFormElementBehavior
+            ],
+            validate: function () {
+                if (!this.required) return true;
+                var valid = !(this.date === undefined) && this.$.picker._withinValidRange(this.date);
+                this.set("invalid", !valid);
+                return valid;
+            },
+            _openPicker: function (e) {
+                this.$.dialog.open();
+            },
+            _onhover: function (e) {
+                if (this.autoPop) this.$.dialog.open();
+                this.set("focused", true);
+            },
+            _offhover: function (e) {
+                this.set("focused", false);
+            },
+            _onFocused: function (focused) {
+                this.$.container._setFocused(focused);
+            },
+            _onDateChanged: function (date) {
+                console.log("_onDateChanged", date);
+            },
+            _getVertOffset: function (f) {
+                return this.__getContainerRect().y; 
+            },
+            _getHorzOffset: function (f) {
+                return this.__getContainerRect().x;
+            },
+            __getContainerRect: function(){
+                return this.$.btn.getBoundingClientRect();
+            }
+        });
+    </script>
+</dom-module>
