@@ -1,5 +1,6 @@
-﻿<link rel="import" href="../polymer/polymer.html" />
+<link rel="import" href="../polymer/polymer.html" />
 <link rel="import" href="../xenon-date/xenon-date.html" />
+<link rel="import" href="../xenon-layout/xenon-dialog.html" />
 <link rel="import" href="../paper-dialog/paper-dialog.html" />
 <link rel="import" href="../paper-date-picker/paper-date-picker.html" />
 <link rel="import" href="../paper-icon-button/paper-icon-button.html" />
@@ -21,7 +22,7 @@
             .input { display: flex; align-items: center; cursor: pointer; }
                 .input:hover > paper-icon-button.iconbtn { transition: background-color 0.5s linear; background-color: gainsboro; border-radius: 50%; color: #212121; }
         </style>
-        <paper-input-container id="container" invalid="{{invalid}}">
+        <paper-input-container always-float-label id="container" invalid="{{invalid}}">
             <label hidden$="[[!label]]">[[label]]</label>
             <div class="input" on-click="_openPicker" on-mouseover="_onhover" on-mouseout="_offhover">
                 <paper-icon-button id="btn" toggles active="{{focused}}" class="iconbtn" icon="[[icon]]"></paper-icon-button>
@@ -33,12 +34,12 @@
         </paper-input-container>
 
         <paper-dialog id="dialog" class="paper-date-picker-dialog" with-backdrop
-                      auto-fit-on-attach
-                      entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-            <paper-date-picker min-date="[[minDate]]" max-date="[[maxDate]]" id="picker" date="{{date}}"></paper-date-picker>
+                      auto-fit-on-attach>
+                      <!--entry-animation="scale-up-animation" exit-animation="scale-down-animation"-->
+            <paper-date-picker min-date="[[minDate]]" max-date="[[maxDate]]" id="picker"></paper-date-picker>
             <div class="buttons">
                 <paper-button style="color:#757575;" dialog-dismiss>Cancel</paper-button>
-                <paper-button class="primary" dialog-confirm>OK</paper-button>
+                <paper-button raised class="primary" dialog-confirm on-click="_confirmDate">OK</paper-button>
             </div>
         </paper-dialog>
     </template>
@@ -49,7 +50,7 @@
                 name: { type: String, notify: true },
                 maxDate: { type: String, notify: true },
                 maxDate: { type: String, notify: true },
-                date: { type: String, notify: true, observer: "_onDateChanged" },
+                date: { type: Date, notify: true, observer: "_onDateChanged" },
                 autoPop: { type: Boolean, notify: true, value: false, reflectToAttribute: true  },
                 disabled: { type: Boolean, notify: true, value: false },
                 invalid: { type: Boolean, notify: true, value: false },
@@ -70,7 +71,7 @@
             ],
             validate: function () {
                 if (!this.required) return true;
-                var valid = !(this.date === undefined) && this.$.picker._withinValidRange(this.date);
+                var valid = !(this.date === undefined) ;
                 this.set("invalid", !valid);
                 return valid;
             },
@@ -89,6 +90,7 @@
             },
             _onDateChanged: function (date) {
                 console.log("_onDateChanged", date);
+                this.$.picker.date = new Date( date);
             },
             _getVertOffset: function (f) {
                 return this.__getContainerRect().y; 
@@ -98,6 +100,9 @@
             },
             __getContainerRect: function(){
                 return this.$.btn.getBoundingClientRect();
+            },
+            _confirmDate: function (e) {
+                this.set("date", this.$.picker.date);
             }
         });
     </script>
